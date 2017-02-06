@@ -7,6 +7,7 @@ from subprocess import call
 from os import listdir
 from PIL import Image
 
+
 fileName = argv[1]
 imgName = argv[2]
 x = int(argv[3])
@@ -14,13 +15,16 @@ y = int(argv[4])
 nameOut = argv[5]
 imagesPath = '/home/settnozz/PycharmProjects/vidTst/images/'
 imageFramePath = '/home/settnozz/PycharmProjects/vidTst/frames/'
-imgChange = Image.open(imagesPath + imgName)
-container = av.open('rtmp://localhost/myapp/mystream')
+#imgChange = Image.open(imagesPath + imgName)
+print('lalala')
+container = av.open('http://127.0.0.1:1935/myapp/mystream')
+print('rtmp://localhost/myapp/mystream opened')
 video = next(s for s in container.streams if s.type == b'video')
+print('after fideo=next')
 
 for packet in container.demux(video):
     for frame in packet.decode():
-        frame.to_image().save(imageFramePath + 'frame-%04d.jpg' % frame.index)
+        print(frame.to_image())#.save(imageFramePath + 'frame-%04d.jpg' % frame.index)
 
 
 ar = listdir(imageFramePath)
