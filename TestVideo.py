@@ -1,6 +1,7 @@
 import av
-import glob
-import os
+import librtmp
+from glob import glob
+from os import remove
 from sys import argv
 from subprocess import call
 from os import listdir
@@ -14,7 +15,7 @@ nameOut = argv[5]
 imagesPath = '/home/settnozz/PycharmProjects/vidTst/images/'
 imageFramePath = '/home/settnozz/PycharmProjects/vidTst/frames/'
 imgChange = Image.open(imagesPath + imgName)
-container = av.open(fileName)
+container = av.open('rtmp://localhost/myapp/mystream')
 video = next(s for s in container.streams if s.type == b'video')
 
 for packet in container.demux(video):
@@ -40,6 +41,6 @@ for i in filesList:
 def makeVideo(nameOut):
     call(['ffmpeg', '-framerate', '13', '-i', imageFramePath + 'frame-%04d.jpg', nameOut])
     for file in glob.glob(imageFramePath + 'frame-*.jpg'):
-        os.remove(file)
+        remove(file)
 
 makeVideo(nameOut)
