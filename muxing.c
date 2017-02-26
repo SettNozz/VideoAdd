@@ -42,6 +42,7 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libswresample/swresample.h>
+#include "muxing.h"
 
 #define STREAM_DURATION   10.0
 #define STREAM_FRAME_RATE 25 /* 25 images/s */
@@ -50,7 +51,7 @@
 #define SCALE_FLAGS SWS_BICUBIC
 
 // a wrapper around a single output AVStream
-typedef struct OutputStream {
+typedef struct _OutputStream {
     AVStream *st;
 
     /* pts of the next frame that will be generated */
@@ -66,7 +67,7 @@ typedef struct OutputStream {
     struct SwrContext *swr_ctx;
 } OutputStream;
 
-typedef struct Stream_context {
+typedef struct _Stream_context {
     OutputStream video_st;
     OutputStream audio_st;
     const char *filename;
@@ -78,9 +79,6 @@ typedef struct Stream_context {
     int encode_video, encode_audio;
     AVDictionary *opt;
 } Stream_context;
-
-int preparation(Stream_context *);
-void Close_stream(Stream_context *);
 
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
 {
@@ -503,7 +501,7 @@ static AVFrame *get_video_frame(OutputStream *ost)
  * encode one video frame and send it to the muxer
  * return 1 when encoding is finished, 0 otherwise
  */
-static int write_video_frame(AVFormatContext *oc, OutputStream *ost, AVFrame *frame)
+int muxing_write_video_frame(AVFormatContext *oc, OutputStream *ost, AVFrame *frame)
 {
     int ret;
     AVCodecContext *c;
@@ -551,13 +549,13 @@ static void close_stream(AVFormatContext *oc, OutputStream *ost)
 /**************************************************************/
 /* media file output */
 
-int preparation(Stream_context *sc){
+Stream_context *muxing_preparation(){
     /* Initialize libavcodec, and register all codecs and formats. */
-
+    Stream_context *sc = calloc(1, sizeof(Stream_context));
     sc->have_video = 0, sc->have_audio = 0;
     sc->encode_video = 0, sc->encode_audio = 0;
-    sc->opt = NULL;                                     // must by sc->*opt = NULL
-    sc->filename = "rtmp://localhost/myapp/mystream";
+    sc->opt = NULL;                                     // must be sc->*opt = NULL
+    sc->filename = "output.flv";
     OutputStream audio_st = { 0 };
     sc->audio_st = audio_st;
     OutputStream video_st = { 0 };
@@ -620,13 +618,13 @@ int preparation(Stream_context *sc){
     if (sc->ret < 0) {
         fprintf(stderr, "Error occurred when opening output file: %s\n",
                 av_err2str(sc->ret));
-        return 1;
+        return sc;
     }
-    return 0;
+    return sc;
 }
 
 
-void Close_stream(Stream_context *sc){
+void muxing_Close_stream(Stream_context *sc){
 
     av_write_trailer(sc->oc);
 
@@ -642,15 +640,14 @@ void Close_stream(Stream_context *sc){
 
     /* free the stream */
     avformat_free_context(sc->oc);
-
+    free(sc);
 }
 
 
 int main(int argc, char **argv)
 {
-    Stream_context sc_storage;
-    Stream_context *sc = &sc_storage;
-    preparation(sc);
+    Stream_context *sc;
+    sc = muxing_preparation();
     AVFrame *frame;
     while (sc->encode_video || sc->encode_audio) {
         /* select the stream to encode */
@@ -658,13 +655,13 @@ int main(int argc, char **argv)
             (!sc->encode_audio || av_compare_ts(sc->video_st.next_pts, sc->video_st.st->codec->time_base,
                                             sc->audio_st.next_pts, sc->audio_st.st->codec->time_base) <= 0)) {
             frame = get_video_frame(&sc->video_st);
-            sc->encode_video = !write_video_frame(sc->oc, &sc->video_st, frame);
+            sc->encode_video = !muxing_write_video_frame(sc->oc, &sc->video_st, frame);
         } else {
             sc->encode_audio = !write_audio_frame(sc->oc, &sc->audio_st);
         }
     }
 
-    Close_stream(sc);
+    muxing_Close_stream(sc);
     return 0;
 }
 
