@@ -1,32 +1,8 @@
 /*
- * Copyright (c) 2003 Fabrice Bellard
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
+ gcc -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavresample -Llibavutil -Llibpostproc -Llibswscale -Llibswresample -Wl,-dynamic,-search_paths_first -Qunused-arguments  -o doc/examples/muxing_g doc/examples/muxing.c   -lavdevice -lavfilter -lavformat -lavcodec -lpostproc -lswresample -lswscale -lavutil -framework QuartzCore -framework QuartzCore -framework AppKit -framework OpenGL -framework QuartzCore -framework AppKit -framework OpenGL -framework QTKit -framework Foundation -framework QuartzCore -framework CoreVideo -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreFoundation -framework VideoToolbox -framework CoreMedia -framework CoreVideo -framework CoreFoundation -framework AudioToolbox -framework CoreMedia -framework VideoDecodeAcceleration -framework CoreFoundation -framework QuartzCore -liconv -Wl,-framework,CoreFoundation -Wl,-framework,Security -lxvidcore -L/usr/local/Cellar/x264/r2748/lib -lx264 -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -lvorbisenc -lvorbis -logg -ltheoraenc -ltheoradec -logg -L/usr/local/Cellar/opus/1.1.4/lib -lopus -lmp3lame -L/usr/local/opt/freetype/lib -lfreetype -L/usr/local/Cellar/fdk-aac/0.1.5/lib -lfdk-aac -L/usr/local/Cellar/libass/0.13.6/lib -lass -framework CoreGraphics -lm -llzma -lbz2 -lz -pthread -framework CoreServices
 
-/**
- * @file
- * libavformat API example.
- *
- * Output a media file in any supported libavformat format. The default
- * codecs are used.
- * @example muxing.c
+ 
+ gcc -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavresample -Llibavutil -Llibpostproc -Llibswscale -Llibswresample -Wl,-dynamic,-search_paths_first -Qunused-arguments -shared  -o doc/examples/muxing_g.dylib doc/examples/muxing.c   -lavdevice -lavfilter -lavformat -lavcodec -lpostproc -lswresample -lswscale -lavutil -framework QuartzCore -framework QuartzCore -framework AppKit -framework OpenGL -framework QuartzCore -framework AppKit -framework OpenGL -framework QTKit -framework Foundation -framework QuartzCore -framework CoreVideo -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreFoundation -framework VideoToolbox -framework CoreMedia -framework CoreVideo -framework CoreFoundation -framework AudioToolbox -framework CoreMedia -framework VideoDecodeAcceleration -framework CoreFoundation -framework QuartzCore -liconv -Wl,-framework,CoreFoundation -Wl,-framework,Security -lxvidcore -L/usr/local/Cellar/x264/r2748/lib -lx264 -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -lvorbisenc -lvorbis -logg -ltheoraenc -ltheoradec -logg -L/usr/local/Cellar/opus/1.1.4/lib -lopus -lmp3lame -L/usr/local/opt/freetype/lib -lfreetype -L/usr/local/Cellar/fdk-aac/0.1.5/lib -lfdk-aac -L/usr/local/Cellar/libass/0.13.6/lib -lass -framework CoreGraphics -lm -llzma -lbz2 -lz -pthread -framework CoreServices
  */
 
 #include <stdlib.h>
