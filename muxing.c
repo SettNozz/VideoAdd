@@ -532,7 +532,7 @@ Stream_context *muxing_preparation(){
     sc->have_video = 0, sc->have_audio = 0;
     sc->encode_video = 0, sc->encode_audio = 0;
     sc->opt = NULL;                                     // must be sc->*opt = NULL
-    sc->filename = "output.flv";
+    sc->filename = "rtmp://localhost/myapp/mystream";
     OutputStream audio_st = { 0 };
     sc->audio_st = audio_st;
     OutputStream video_st = { 0 };
