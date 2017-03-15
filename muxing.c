@@ -1,10 +1,3 @@
-/*
- gcc -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavresample -Llibavutil -Llibpostproc -Llibswscale -Llibswresample -Wl,-dynamic,-search_paths_first -Qunused-arguments  -o doc/examples/muxing_g doc/examples/muxing.c   -lavdevice -lavfilter -lavformat -lavcodec -lpostproc -lswresample -lswscale -lavutil -framework QuartzCore -framework QuartzCore -framework AppKit -framework OpenGL -framework QuartzCore -framework AppKit -framework OpenGL -framework QTKit -framework Foundation -framework QuartzCore -framework CoreVideo -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreFoundation -framework VideoToolbox -framework CoreMedia -framework CoreVideo -framework CoreFoundation -framework AudioToolbox -framework CoreMedia -framework VideoDecodeAcceleration -framework CoreFoundation -framework QuartzCore -liconv -Wl,-framework,CoreFoundation -Wl,-framework,Security -lxvidcore -L/usr/local/Cellar/x264/r2748/lib -lx264 -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -lvorbisenc -lvorbis -logg -ltheoraenc -ltheoradec -logg -L/usr/local/Cellar/opus/1.1.4/lib -lopus -lmp3lame -L/usr/local/opt/freetype/lib -lfreetype -L/usr/local/Cellar/fdk-aac/0.1.5/lib -lfdk-aac -L/usr/local/Cellar/libass/0.13.6/lib -lass -framework CoreGraphics -lm -llzma -lbz2 -lz -pthread -framework CoreServices
-
- 
- gcc -Llibavcodec -Llibavdevice -Llibavfilter -Llibavformat -Llibavresample -Llibavutil -Llibpostproc -Llibswscale -Llibswresample -Wl,-dynamic,-search_paths_first -Qunused-arguments -shared  -o doc/examples/muxing_g.dylib doc/examples/muxing.c   -lavdevice -lavfilter -lavformat -lavcodec -lpostproc -lswresample -lswscale -lavutil -framework QuartzCore -framework QuartzCore -framework AppKit -framework OpenGL -framework QuartzCore -framework AppKit -framework OpenGL -framework QTKit -framework Foundation -framework QuartzCore -framework CoreVideo -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreFoundation -framework VideoToolbox -framework CoreMedia -framework CoreVideo -framework CoreFoundation -framework AudioToolbox -framework CoreMedia -framework VideoDecodeAcceleration -framework CoreFoundation -framework QuartzCore -liconv -Wl,-framework,CoreFoundation -Wl,-framework,Security -lxvidcore -L/usr/local/Cellar/x264/r2748/lib -lx264 -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -L/usr/local/Cellar/libvpx/1.6.1/lib -lvpx -lm -lvorbisenc -lvorbis -logg -ltheoraenc -ltheoradec -logg -L/usr/local/Cellar/opus/1.1.4/lib -lopus -lmp3lame -L/usr/local/opt/freetype/lib -lfreetype -L/usr/local/Cellar/fdk-aac/0.1.5/lib -lfdk-aac -L/usr/local/Cellar/libass/0.13.6/lib -lass -framework CoreGraphics -lm -llzma -lbz2 -lz -pthread -framework CoreServices
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -55,6 +48,11 @@ typedef struct _Stream_context {
     int encode_video, encode_audio;
     AVDictionary *opt;
 } Stream_context;
+
+char** get_frame(Stream_context* tmp){
+    return (char **)tmp->video_st.frame->data;
+}
+
 
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
 {
@@ -477,8 +475,11 @@ static AVFrame *get_video_frame(OutputStream *ost)
  * encode one video frame and send it to the muxer
  * return 1 when encoding is finished, 0 otherwise
  */
-int muxing_write_video_frame(AVFormatContext *oc, OutputStream *ost, AVFrame *frame)
+int muxing_write_video_frame(Stream_context *tmp)
 {
+    AVFrame* frame = tmp->video_st.frame;
+    AVFormatContext *oc = tmp->oc;
+    OutputStream *ost = &tmp->video_st;
     int ret;
     AVCodecContext *c;
     //AVFrame *frame;
@@ -551,8 +552,8 @@ Stream_context *muxing_preparation(){
         printf("Could not deduce output format from file extension: using MPEG.\n");
         avformat_alloc_output_context2(&sc->oc, NULL, "mpeg", sc->filename);
     }
-    if (!sc->oc)
-        return 1;
+    //if (!sc->oc)
+    //    return 1;
 
     sc->fmt = sc->oc->oformat;
 
@@ -580,14 +581,15 @@ Stream_context *muxing_preparation(){
     av_dump_format(sc->oc, 0, sc->filename, 1);
 
     /* open the output file, if needed */
-    if (!(sc->fmt->flags & AVFMT_NOFILE)) {
+    /*if (!(sc->fmt->flags & AVFMT_NOFILE)) {
         sc->ret = avio_open(&sc->oc->pb, sc->filename, AVIO_FLAG_WRITE);
         if (sc->ret < 0) {
             fprintf(stderr, "Could not open '%s': %s\n", sc->filename,
                     av_err2str(sc->ret));
             return 1;
         }
-    }
+    } 
+*/
 
     /* Write the stream header, if any. */
     sc->ret = avformat_write_header(sc->oc, &sc->opt);
@@ -631,7 +633,7 @@ int main(int argc, char **argv)
             (!sc->encode_audio || av_compare_ts(sc->video_st.next_pts, sc->video_st.st->codec->time_base,
                                             sc->audio_st.next_pts, sc->audio_st.st->codec->time_base) <= 0)) {
             frame = get_video_frame(&sc->video_st);
-            sc->encode_video = !muxing_write_video_frame(sc->oc, &sc->video_st, frame);
+            sc->encode_video = !muxing_write_video_frame(sc);
         } else {
             sc->encode_audio = !write_audio_frame(sc->oc, &sc->audio_st);
         }
@@ -640,4 +642,3 @@ int main(int argc, char **argv)
     muxing_Close_stream(sc);
     return 0;
 }
-

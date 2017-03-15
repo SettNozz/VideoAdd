@@ -3,11 +3,11 @@
 
 import socket
 import cv2
-#from PIL import Image
+import msgpack
 
 sock = socket.socket()
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sock.bind(('0.0.0.0', 9090))
+sock.bind(('0.0.0.0', 8080))
 sock.setblocking(False)
 sock.listen(1)
 fileName = 'newImage.jpg'
@@ -16,14 +16,20 @@ def maybeNewImage():
     try:
         conn, addr = sock.accept()
     except:
-        dataTime = 100000
-        return None, dataTime
+        return None, None, None, None
     conn.setblocking(True)
-    data = conn.recv(20000)
+    data = conn.recv(200000)
+    unpackData = msgpack.unpackb(data)
     newFile = open(fileName, 'w')
-    newFile.write(data)
+    newFile.write(unpackData['Image'])
     newFile.close()
     imgRet = cv2.imread(fileName)
-    dataTime = conn.recv(2048)
+    dataTime = unpackData['Time']
+    x = unpackData['x']
+    y = unpackData['y']
     conn.close()
-    return(imgRet, dataTime)
+    print('HAHAHA')
+    print(type(imgRet))
+    print(type(x))
+    print(type(y))
+    return(imgRet, dataTime, x, y)
