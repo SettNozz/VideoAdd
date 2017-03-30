@@ -581,15 +581,15 @@ Stream_context *muxing_preparation(){
     av_dump_format(sc->oc, 0, sc->filename, 1);
 
     /* open the output file, if needed */
-    /*if (!(sc->fmt->flags & AVFMT_NOFILE)) {
+    if (!(sc->fmt->flags & AVFMT_NOFILE)) {
         sc->ret = avio_open(&sc->oc->pb, sc->filename, AVIO_FLAG_WRITE);
         if (sc->ret < 0) {
             fprintf(stderr, "Could not open '%s': %s\n", sc->filename,
                     av_err2str(sc->ret));
-            return 1;
+            return NULL;
         }
     } 
-*/
+
 
     /* Write the stream header, if any. */
     sc->ret = avformat_write_header(sc->oc, &sc->opt);

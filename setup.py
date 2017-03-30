@@ -1,7 +1,7 @@
 from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
-
+import numpy
 
 libs = [s.replace('-l', '') for s in "-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -ldl -ldl  -lm -llzma -lz -lm".split()]
 
