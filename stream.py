@@ -1,7 +1,12 @@
 import cv2
 import sockTest
 import os
+import muxing_py
 
+
+print('vefore create obj')
+stream_obj = muxing_py.Stream()
+print('object created')
 cam2 = 'rtmp://localhost/myapp/mystream'
 cap = cv2.VideoCapture()
 cap.open(cam2)
@@ -36,9 +41,13 @@ while(cap.isOpened()):
         if counter == countStop:
             overlay, countStop, counter, IKS, IGR = None, 0, 0, 0, 0
     #out.write(frame)
+    print('before write stream')
+    stream_obj.write_and_decode(frame)
+    print('after write stream')
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
 
 cap.release()
 #out.release()
