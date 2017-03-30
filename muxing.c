@@ -131,8 +131,8 @@ static void add_stream(OutputStream *ost, AVFormatContext *oc,
 
         c->bit_rate = 400000;
         /* Resolution must be a multiple of two. */
-        c->width    = 352;
-        c->height   = 288;
+        c->width    = 1092;
+        c->height   = 614;
         /* timebase: This is the fundamental unit of time (in seconds) in terms
          * of which frame timestamps are represented. For fixed-fps content,
          * timebase should be 1/framerate and timestamp increments should be
@@ -532,7 +532,7 @@ Stream_context *muxing_preparation(){
     sc->have_video = 0, sc->have_audio = 0;
     sc->encode_video = 0, sc->encode_audio = 0;
     sc->opt = NULL;                                     // must be sc->*opt = NULL
-    sc->filename = "rtmp://localhost/myapp/mystream";
+    sc->filename = "rtmp://localhost/myapp/moon";
     OutputStream audio_st = { 0 };
     sc->audio_st = audio_st;
     OutputStream video_st = { 0 };

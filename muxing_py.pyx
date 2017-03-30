@@ -1,5 +1,6 @@
 cimport cmuxing 
 
+
 cdef class Stream:
     cdef cmuxing.Stream_context* _c_stream 
     def __cinit__(self):
@@ -11,11 +12,15 @@ cdef class Stream:
         
         # need to change format:
 
-        i_img = 1092
-        j_img = 614
+        i_img = 614
+        j_img = 1092
         for i in range(i_img):
             for j in range(j_img):
-                spam[i*i_img + j] = img[i, j]
+                print(i,j)
+                spam[0][i*i_img + j] = 100
+                spam[1][i*i_img + j] = 100
+                spam[2][i*i_img + j] = 100
+                
         cmuxing.muxing_write_video_frame(self._c_stream)
 
 

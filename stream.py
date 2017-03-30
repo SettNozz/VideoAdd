@@ -7,7 +7,7 @@ import muxing_py
 print('vefore create obj')
 stream_obj = muxing_py.Stream()
 print('object created')
-cam2 = 'rtmp://localhost/myapp/mystream'
+cam2 = 'rtmp://localhost/myapp/monkey'
 cap = cv2.VideoCapture()
 cap.open(cam2)
 overlay = None
@@ -41,10 +41,11 @@ while(cap.isOpened()):
         if counter == countStop:
             overlay, countStop, counter, IKS, IGR = None, 0, 0, 0, 0
     #out.write(frame)
+    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     print('before write stream')
-    stream_obj.write_and_decode(frame)
+    stream_obj.write_and_decode(gray_image)
     print('after write stream')
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', gray_image)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
