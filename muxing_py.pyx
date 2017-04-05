@@ -8,18 +8,20 @@ cdef class Stream:
 
     #prototype
     cpdef write_and_decode(self, img):
-        spam = cmuxing.get_frame(self._c_stream)
+        spam = cmuxing.muxing_get_frame(self._c_stream)
         
         # need to change format:
 
-        i_img = 614
-        j_img = 1092
-        for i in range(i_img):
-            for j in range(j_img):
-                print(i,j)
-                spam[0][i*i_img + j] = 100
-                spam[1][i*i_img + j] = 100
-                spam[2][i*i_img + j] = 100
+        rows, cols = img.shape
+        width, height = cols, rows
+        for x in range(width):
+            for y in range(height):
+                spam[0][y*width + x] = <char><long long>(img[y,x] % 255)
+
+        for x in range(width/2):
+            for y in range(height/2):
+                spam[1][y*(width/2) + x] = 100
+                spam[2][y*(width/2) + x] = 100
                 
         cmuxing.muxing_write_video_frame(self._c_stream)
 

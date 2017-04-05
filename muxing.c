@@ -49,7 +49,7 @@ typedef struct _Stream_context {
     AVDictionary *opt;
 } Stream_context;
 
-char** get_frame(Stream_context* tmp){
+char** muxing_get_frame(Stream_context* tmp){
     return (char **)tmp->video_st.frame->data;
 }
 
@@ -57,7 +57,6 @@ char** get_frame(Stream_context* tmp){
 static void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
 {
     AVRational *time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
-
     printf("pts:%s pts_time:%s dts:%s dts_time:%s duration:%s duration_time:%s stream_index:%d\n",
            av_ts2str(pkt->pts), av_ts2timestr(pkt->pts, time_base),
            av_ts2str(pkt->dts), av_ts2timestr(pkt->dts, time_base),
@@ -437,7 +436,7 @@ static void fill_yuv_image(AVFrame *pict, int frame_index,
 static AVFrame *get_video_frame(OutputStream *ost)
 {
     AVCodecContext *c = ost->st->codec;
-
+    
     /* check if we want to generate more frames */
     if (av_compare_ts(ost->next_pts, ost->st->codec->time_base,
                       STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
@@ -481,11 +480,15 @@ int muxing_write_video_frame(Stream_context *tmp)
     AVFormatContext *oc = tmp->oc;
     OutputStream *ost = &tmp->video_st;
     int ret;
+    int ret2;
+    ret2 = av_frame_make_writable(frame);
+    if (ret2 < 0)
+        printf("RET2 < 0!");
     AVCodecContext *c;
     //AVFrame *frame;
     int got_packet = 0;
     AVPacket pkt = { 0 };
-
+    
     c = ost->st->codec;
 
 
@@ -510,6 +513,8 @@ int muxing_write_video_frame(Stream_context *tmp)
         fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(ret));
         exit(1);
     }
+    
+    //get_video_frame: linesize[0]=1280 linesize[1]=640 linesize[2]=640
 
     return (frame || got_packet) ? 0 : 1;
 }
@@ -598,6 +603,7 @@ Stream_context *muxing_preparation(){
                 av_err2str(sc->ret));
         return sc;
     }
+    
     return sc;
 }
 
