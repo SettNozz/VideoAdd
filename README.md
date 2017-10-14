@@ -1,5 +1,10 @@
 # VideoAdd
-This programm read video stream from server, and add any picture, what you want.
+This application allows you to overlay image in the video stream based on nginx.
+We take the video stream from the server, process it, overlay the picture we need, and send the updated stream to Twitch.
+The main part is written on a python, an auxiliary on with C++. Merge with Cython.
+
+Technologies:
+-OpenCV
 
 To start muxing.c:
 
